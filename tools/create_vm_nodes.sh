@@ -136,7 +136,7 @@ function create_node {
     <pae/>
   </features>
   <clock offset='utc'/>
-  <on_poweroff>destroy</on_poweroff>
+  <on_poweroff>poweroff</on_poweroff>
   <on_reboot>restart</on_reboot>
   <on_crash>restart</on_crash>
   <devices>
