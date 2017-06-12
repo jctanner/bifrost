@@ -79,9 +79,30 @@
       environment:
         ANSIBLE_INSTALL_ROOT: "{{ansible_install_root}}"
 
+    - name: make a temp ansible checkout
+      shell: git clone https://github.com/ansible/ansible /opt/ansible.checkout
+
     - name: Install Bifrost
-      shell: source {{ansible_install_root}}/ansible/hacking/env-setup && ansible-playbook -vvvv -i inventory/localhost install.yaml -e network_interface={{network_interface}}
+      #shell: source {{ansible_install_root}}/ansible/hacking/env-setup && ansible-playbook -vvvv -i inventory/localhost install.yaml -e network_interface={{network_interface}}
+      shell: source /opt/ansible.checkout/hacking/env-setup && ansible-playbook -vvvv -i inventory/localhost install.yaml -e network_interface={{network_interface}}
       args:
           chdir: /home/vagrant/bifrost/playbooks
           executable: /bin/bash
 
+    - name: pymysql workaround
+      pip:
+        name: PyMySQL
+        state: present
+
+    - name: sshkeygen workaround
+      file:
+        path: /root/.ssh
+        state: directory
+
+    - name: sshkeygen workaround
+      copy:
+        dest: /root/.ssh/known_hosts
+        content: ""
+
+    - name: module chown workaround
+      shell: chown vagrant:vagrant /home/vagrant/bifrost/scripts/../playbooks/library/*
