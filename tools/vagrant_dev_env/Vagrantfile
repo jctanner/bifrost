@@ -33,7 +33,7 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
     # the bridged interface.
     # NOTE(TheJulia): Is there a way to abstract the bridged networking...
     # NOTE(NobodyCam): until the above is  done this needs to be set to a valid interface
-    bifrost.vm.network 'public_network', bridge: ''
+    #bifrost.vm.network 'public_network', bridge: ''
 
     # besure we get the entire bifrost directory tree
     bifrost.vm.synced_folder "../../.", "/home/vagrant/bifrost", type: "rsync"
@@ -53,4 +53,9 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
       }
     end
   end
+
+  if Vagrant.has_plugin?("vagrant-cachier")
+    config.cache.scope = :box
+  end
+
 end
