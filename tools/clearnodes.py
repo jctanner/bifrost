@@ -14,14 +14,20 @@ def run_command(cmd):
 def get_nodes():
     cmd = 'ironic --json node-list'
     (rc, so, se) = run_command(cmd)
-    nodes = json.loads(so)
+    try:
+        nodes = json.loads(so)
+    except:
+        nodes = []
     return nodes
 
     
 def get_ports():
     cmd = 'ironic --json port-list'
     (rc, so, se) = run_command(cmd)
-    nodes = json.loads(so)
+    try:
+        nodes = json.loads(so)
+    except:
+        nodes = []
     return nodes
 
 

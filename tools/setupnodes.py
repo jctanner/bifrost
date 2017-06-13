@@ -6,6 +6,8 @@ import sys
 import time
 from pprint import pprint
 
+#NODECOUNT=3
+NODECOUNT=1
 
 def run_command(cmd, wait=True):
     p = subprocess.Popen(cmd, shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
@@ -19,14 +21,20 @@ def run_command(cmd, wait=True):
 def get_nodes():
     cmd = 'ironic --json node-list'
     (rc, so, se) = run_command(cmd)
-    nodes = json.loads(so)
+    try:
+        nodes = json.loads(so)
+    except:
+        nodes = []
     return nodes
 
     
 def get_ports():
     cmd = 'ironic --json port-list'
     (rc, so, se) = run_command(cmd)
-    nodes = json.loads(so)
+    try:
+        nodes = json.loads(so)
+    except:
+        nodes = []
     return nodes
 
 
@@ -115,8 +123,8 @@ def update_ironic_node_info(uuid, domain, ipmi_host='127.0.0.1', ipmi_port=623, 
     cmd += ' instance_info/root_gb=10'
 
     # boot info
-    cmd += ' instance_info/ramdisk=http://192.168.122.1:8080/ipa.initramfs'
-    cmd += ' instance_info/kernel=http://192.168.122.1:8080/ipa.vmlinuz'
+    #cmd += ' instance_info/ramdisk=http://192.168.122.1:8080/ipa.initramfs'
+    #cmd += ' instance_info/kernel=http://192.168.122.1:8080/ipa.vmlinuz'
     cmd += ' instance_info/image_source=http://192.168.122.1:8080/CentOS-Atomic-Host-7-GenericCloud.qcow2'
     cmd += ' instance_info/image_checksum=a2aaaefa1652ee2f6d081ae600461d2b'
 
@@ -138,7 +146,8 @@ def main():
         print('#####################################')
         print('# Creating domains')
         print('#####################################')
-        cmd = 'sudo OUTFILE=/tmp/nodes.csv NODEBASE=openshift NODECOUNT=3 ./create_vm_nodes.sh'
+        #cmd = 'sudo OUTFILE=/tmp/nodes.csv NODEBASE=openshift NODECOUNT=3 ./create_vm_nodes.sh'
+        cmd = 'sudo OUTFILE=/tmp/nodes.csv NODEBASE=openshift NODECOUNT=%s ./create_vm_nodes.sh' % NODECOUNT
         (rc, so, se) = run_command(cmd)
         if rc != 0:
             print(so)
@@ -160,7 +169,7 @@ def main():
     print('# Wait for ironic node registrations')
     print('#####################################')
     # Wait for nodes to register with ironic
-    while not len(get_nodes()) == 3:
+    while len(get_nodes()) < NODECOUNT:
         print('# waiting for nodes to boot: sleep 10s')
         pprint(get_nodes())
         time.sleep(10)
