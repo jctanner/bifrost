@@ -136,7 +136,7 @@ function create_node {
     <pae/>
   </features>
   <clock offset='utc'/>
-  <on_poweroff>poweroff</on_poweroff>
+  <on_poweroff>destroy</on_poweroff>
   <on_reboot>restart</on_reboot>
   <on_crash>restart</on_crash>
   <devices>
@@ -182,7 +182,8 @@ function create_node {
 "
 
       echo ${vm_xml} > /tmp/vm.xml
-      virsh create /tmp/vm.xml 2>&1 >/dev/null
+      #virsh create /tmp/vm.xml 2>&1 >/dev/null
+      virsh define /tmp/vm.xml 2>&1 >/dev/null
       if [ $? != 0 ]
       then
          echo "failed to create VM $NAME"
