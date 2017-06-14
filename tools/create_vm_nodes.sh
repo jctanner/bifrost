@@ -39,8 +39,8 @@ export VIRSH_DEFAULT_CONNECT_URI="$LIBVIRT_CONNECT_URI"
 # VM specs
 VM_EMULATOR=${VM_EMULATOR:-/usr/bin/qemu-system-x86_64}
 VM_CPU=${VM_CPU:-1}
-VM_RAM=${VM_RAM:-3072}
-VM_DISK=${VM_DISK:-20}
+VM_RAM=${VM_RAM:-8192}
+VM_DISK=${VM_DISK:-25}
 
 # VM network
 VM_NET_BRIDGE=${VM_NET_BRIDGE:-default}
@@ -221,9 +221,18 @@ IFS=$'\n'
 for (( i=1; i<=${NODECOUNT}; i++ ))
 do
     name=${NODEBASE}${i}
-    mac=$(create_node $name $VM_CPU $VM_RAM $VM_DISK amd64 $VM_NET_BRIDGE $VM_EMULATOR $VM_LOGDIR)
-
-    CSV_LINES+=("$mac,root,undefined,192.168.122.1,$VM_CPU,$VM_RAM,$VM_DISK,flavor,type,a8cb6624-0d9f-c882-affc-046ebb96ec0${i},$name,192.168.122.$((i+1)),,,,agent_ssh")
+    if [[ $i == 1 ]]; then
+        # double the specs for the master
+        CPU=$(( 2 * $VM_CPU ))
+        MEM=$(( 2 * $VM_RAM ))
+        DISK=$(( 2 * $VM_DISK ))
+    else
+        CPU=$VM_CPU
+        MEM=$VM_RAM
+        DISK=$VM_DISK
+    fi
+    mac=$(create_node $name $CPU $MEM $DISK amd64 $VM_NET_BRIDGE $VM_EMULATOR $VM_LOGDIR)
+    CSV_LINES+=("$mac,root,undefined,192.168.122.1,$CPU,$MEM,$VM_DISK,flavor,type,a8cb6624-0d9f-c882-affc-046ebb96ec0${i},$name,192.168.122.$((i+1)),,,,agent_ssh")
 done
 
 echo ${CSV_OUTPUT}

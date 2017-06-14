@@ -6,7 +6,7 @@ import sys
 import time
 from pprint import pprint
 
-NODECOUNT = 6
+NODECOUNT = 3
 #NODECOUNT = 4
 
 
@@ -121,7 +121,10 @@ def update_ironic_node_info(uuid, domain, ipmi_host='127.0.0.1', ipmi_port=623, 
     cmd += ' driver_info/ipmi_port=%s' % ipmi_port
 
     # workaround
-    cmd += ' instance_info/root_gb=10'
+    if domain.endswith('1'):
+        cmd += ' instance_info/root_gb=40'
+    else:
+        cmd += ' instance_info/root_gb=20'
 
     # boot info
     #cmd += ' instance_info/ramdisk=http://192.168.122.1:8080/ipa.initramfs'
