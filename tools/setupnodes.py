@@ -6,8 +6,9 @@ import sys
 import time
 from pprint import pprint
 
-#NODECOUNT=3
-NODECOUNT=1
+NODECOUNT = 6
+#NODECOUNT = 4
+
 
 def run_command(cmd, wait=True):
     p = subprocess.Popen(cmd, shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
@@ -27,7 +28,7 @@ def get_nodes():
         nodes = []
     return nodes
 
-    
+
 def get_ports():
     cmd = 'ironic --json port-list'
     (rc, so, se) = run_command(cmd)
@@ -135,19 +136,19 @@ def update_ironic_node_info(uuid, domain, ipmi_host='127.0.0.1', ipmi_port=623, 
     (rc, so, se) = run_command(cmd)
     print(str(rc),se)
 
- 
-def main():
+
+def build(nodecount=NODECOUNT):
 
     print('#####################################')
     print('# Checking domains')
     print('#####################################')
     domains = get_domains()
-    if not domains:
+    if not domains or len(domains) != nodecount:
         print('#####################################')
         print('# Creating domains')
         print('#####################################')
         #cmd = 'sudo OUTFILE=/tmp/nodes.csv NODEBASE=openshift NODECOUNT=3 ./create_vm_nodes.sh'
-        cmd = 'sudo OUTFILE=/tmp/nodes.csv NODEBASE=openshift NODECOUNT=%s ./create_vm_nodes.sh' % NODECOUNT
+        cmd = 'sudo OUTFILE=/tmp/nodes.csv NODEBASE=openshift NODECOUNT=%s ./create_vm_nodes.sh' % nodecount
         (rc, so, se) = run_command(cmd)
         if rc != 0:
             print(so)
@@ -163,17 +164,17 @@ def main():
         dinfo = get_domain_info(domain)
         if dinfo['State'] == 'shut off':
             print('starting domain %s' % domain)
-            boot_domain(domain)        
+            boot_domain(domain)
 
     print('#####################################')
     print('# Wait for ironic node registrations')
     print('#####################################')
     # Wait for nodes to register with ironic
-    while len(get_nodes()) < NODECOUNT:
+    while len(get_nodes()) < nodecount:
         print('# waiting for nodes to boot: sleep 10s')
         pprint(get_nodes())
         time.sleep(10)
-    
+
     print('#####################################')
     print('# Fetch node info')
     print('#####################################')
@@ -212,7 +213,7 @@ def main():
             for nport in nports:
                 if nport['address'] == mac:
                     node_uuid = node['uuid']
-                    port = nport
+                    #port = nport
                     break
 
         print('#####################################')
@@ -221,6 +222,12 @@ def main():
         update_ironic_node_info(node_uuid, domain, ipmi_port=vbmc_info['port'])
         print(domain,mac,node_uuid)
 
+
+def main():
+
+    for x in range(1, NODECOUNT+1):
+        print(x)
+        build(nodecount=x)
 
 if __name__ == "__main__":
     main()

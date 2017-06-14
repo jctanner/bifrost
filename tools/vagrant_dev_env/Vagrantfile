@@ -10,13 +10,23 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
 
   config.vm.define 'bifrost' do |bifrost|
     bifrost.vm.provider :virtualbox do |vb|
-      vb.customize ['modifyvm', :id, '--memory', '8196', '--cpus', '4']
+      #vb.customize ['modifyvm', :id, '--memory', '8196', '--cpus', '4']
+      #vb.customize ['modifyvm', :id, '--memory', '16392', '--cpus', '4']
+      vb.customize ['modifyvm', :id, '--memory', '32784', '--cpus', '4']
       # the setting below are to improve performance on mac's and should have little impact elsewhere.
       vb.customize ["modifyvm", :id, "--natdnshostresolver1", "on"]
       vb.customize ["modifyvm", :id, "--natdnsproxy1", "on"]
       vb.customize ["modifyvm", :id, "--nictype1", "Am79C973"]
       vb.customize ["modifyvm", :id, "--nictype2", "Am79C973"]
       vb.customize ["modifyvm", :id, "--nictype3", "Am79C973"]
+
+      # add a bigger disk for libvirt images
+      file_to_disk = 'virtdisk.img'
+      unless File.exist?(file_to_disk)
+        vb.customize ['createhd', '--filename', file_to_disk, '--size', 150 * 1024]
+      end
+      vb.customize ['storageattach', :id, '--storagectl', 'SATAController', '--port', 1, '--device', 0, '--type', 'hdd', '--medium', file_to_disk]
+
     end
 
     # If ANSIBLE_INSTALL_ROOT is available, set that value inside the VM

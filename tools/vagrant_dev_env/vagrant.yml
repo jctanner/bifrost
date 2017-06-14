@@ -106,3 +106,17 @@
 
     - name: module chown workaround
       shell: chown vagrant:vagrant /home/vagrant/bifrost/scripts/../playbooks/library/*
+
+    - name: partition the libvirt disk
+      shell: parted -s -a optimal /dev/sdb mklabel gpt -- mkpart primary ext4 1 -1
+
+    - name: make a filesystem on the libvirt disk
+      shell: mkfs.ext4 /dev/sdb1
+
+    - name: make the /var/lib/libvirt mountpoint
+      file:
+          path: /var/lib/libvirt
+          state: directory
+
+    - name: mount the libvirt disk to the mountpount
+      shell: mount /dev/sdb1 /var/lib/libvirt
